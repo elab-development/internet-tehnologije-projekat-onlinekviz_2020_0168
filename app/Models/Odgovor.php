@@ -8,4 +8,10 @@ use Illuminate\Database\Eloquent\Model;
 class Odgovor extends Model
 {
     use HasFactory;
+
+    protected $fillable = [
+        'pitanje_id',
+        'tekst_odgovora',
+        'tacan_odgovor'
+    ];
 }

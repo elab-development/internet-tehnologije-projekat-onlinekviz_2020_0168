@@ -11,8 +11,8 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::table('pitanjes', function (Blueprint $table) {
-            $table->string('tekst_pitanja', 255)->change();
+        Schema::table('sobas', function (Blueprint $table) {
+            $table->enum('status', ['privatna','javna']) -> default('javna');
             //
         });
     }
@@ -22,7 +22,7 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::table('pitanjes', function (Blueprint $table) {
+        Schema::table('sobas', function (Blueprint $table) {
             //
         });
     }

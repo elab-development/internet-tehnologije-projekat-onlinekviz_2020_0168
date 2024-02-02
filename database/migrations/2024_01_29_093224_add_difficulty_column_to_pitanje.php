@@ -11,8 +11,9 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::table('pitanje', function (Blueprint $table) {
+        Schema::table('pitanjes', function (Blueprint $table) {
             //
+            $table->enum('tezina',['laka','teska'])->after('tekst_pitanja');
         });
     }
 
@@ -21,7 +22,7 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::table('pitanje', function (Blueprint $table) {
+        Schema::table('pitanjes', function (Blueprint $table) {
             //
         });
     }

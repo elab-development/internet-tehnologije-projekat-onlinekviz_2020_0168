@@ -11,7 +11,12 @@ return new class extends Migration
      */
     public function up(): void
     {
+        
         //
+        Schema::table('pitanjes', function (Blueprint $table) {
+            $table->enum('tezina',['laka','srednja','teska'])->after('tekst_pitanja')->change();
+            //
+        });    
     }
 
     /**

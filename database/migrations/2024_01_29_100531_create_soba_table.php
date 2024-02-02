@@ -11,9 +11,11 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::table('pitanjes', function (Blueprint $table) {
-            $table->string('tekst_pitanja', 255)->change();
-            //
+        Schema::create('sobas', function (Blueprint $table) {
+            $table->id();
+            $table->string('kod_sobe')->unique();
+            $table->integer('maksimalan_broj_igraca')->default(0);           
+            $table->timestamps();
         });
     }
 
@@ -22,8 +24,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::table('pitanjes', function (Blueprint $table) {
-            //
-        });
+        Schema::dropIfExists('sobas');
     }
 };

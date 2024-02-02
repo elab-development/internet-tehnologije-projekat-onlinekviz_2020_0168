@@ -14,4 +14,9 @@ class Odgovor extends Model
         'tekst_odgovora',
         'tacan_odgovor'
     ];
+
+    public function pitanje()
+    {
+        return $this->belongsTo(Pitanje::class);
+    }    
 }

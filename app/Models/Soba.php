@@ -14,4 +14,9 @@ class Soba extends Model
         'maksimalan_broj_igraca',
         'status'
     ];
+
+    public function pitanja()
+    {
+        return $this->hasManyThrough(Pitanje::class, Odgovor::class);
+    }    
 }

@@ -3,6 +3,7 @@
 namespace Database\Factories;
 
 use Illuminate\Database\Eloquent\Factories\Factory;
+use App\Models\Pitanje;
 
 /**
  * @extends \Illuminate\Database\Eloquent\Factories\Factory<\App\Models\Pitanje>
@@ -17,7 +18,8 @@ class PitanjeFactory extends Factory
     public function definition(): array
     {
         return [
-            //
+            'tekst_pitanja' => $this->faker->sentence,   
+            'tezina' => $this->faker->numberBetween(1,3),
         ];
     }
 }

@@ -4,6 +4,7 @@ namespace Database\Seeders;
 
 use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
+use App\Models\Odgovor;
 
 class OdgovorSeeder extends Seeder
 {
@@ -12,6 +13,10 @@ class OdgovorSeeder extends Seeder
      */
     public function run(): void
     {
-        //
+        for ($i = 0; $i < 10; $i++) {
+            Odgovor::factory()->create([
+                'pitanje_id' => rand(1, 10), 
+            ]);
+        }
     }
 }

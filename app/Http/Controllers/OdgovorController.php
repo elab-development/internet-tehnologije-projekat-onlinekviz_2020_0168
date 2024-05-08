@@ -30,9 +30,21 @@ class OdgovorController extends Controller
      */
     public function store(Request $request)
     {
-        //
+        $request->validate([
+            'tekst_odgovora' => 'required|string|max:255',
+            'tacan_odgovor' => 'required|boolean',
+            'pitanje_id' => 'required|exists:pitanjes,id',
+        ]);
+    
+        $odgovor = Odgovor::create([
+            'tekst_odgovora' => $request->input('tekst_odgovora'),
+            'tacan_odgovor' => $request->input('tacan_odgovor'),
+            'pitanje_id' => $request->input('pitanje_id'),
+        ]);
+    
+        return response()->json(['message' => 'Odgovor je uspešno kreiran!', 'data' => new OdgovorResource($odgovor)], 201);
     }
-
+    
     /**
      * Display the specified resource.
      */

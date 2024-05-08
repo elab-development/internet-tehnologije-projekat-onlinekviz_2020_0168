@@ -27,12 +27,18 @@ Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
 
 
 Route::get('/sobe', [SobaController::class, 'index']);
+Route::get('/sobe/random', [SobaController::class, 'vratiRandomSobu']);
 Route::get('/sobe/status', [SobaController::class, 'prikaziSobeNaOsnovuStatusa']); 
 Route::get('/sobe/maksimalanbrojucesnika/{maksimalan_broj_ucesnika}', [SobaController::class, 'prikaziSobePoMaksimalnomBrojuUcesnika']);
+Route::get('sobe/{sobaCode}/quiz',  [SobaController::class, 'getSpecificQuiz']);
+Route::get('sobe2/{kod}/quiz',  [SobaController::class, 'getQuizFromCode']);
+
 
 Route::post('/register',[AuthController::class,'register']);
 Route::post('/login', [AuthController::class, 'login']);
-Route::post('/forgotPassword',[AuthController::class,'forgotPassword']);
+Route::post('/forgotpassword',[AuthController::class,'forgotPassword']);
+Route::post('/resetpassword',[AuthController::class,'resetPassword']);
+Route::post('/rezultati',[RezultatController::class,'store']);
 
 Route::group(['middleware' => ['auth:sanctum']], function () {
     Route::post('/logout', [AuthController::class, 'logout']);  

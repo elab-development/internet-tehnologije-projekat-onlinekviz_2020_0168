@@ -95,20 +95,42 @@ class SobaController extends Controller
             'kod_sobe' => 'required|string|size:6|unique:sobas',
             'maksimalan_broj_igraca' => 'required|integer|max:10',
             'status' => 'required|in:javna,privatna',
+            'naziv_sobe' => 'required|string|max:255',
+            'pitanja.*.pitanje' => 'required|string|max:255',
+            'pitanja.*.odgovori.*' => 'required|string|max:255',
+            'pitanja.*.tacan_odgovor' => 'required|integer|min:0|max:3',
         ]);
-
+    
         if ($validator->fails()) {
             return response()->json(['error' => $validator->errors()], 400);
         }
-
+    
         $soba = Soba::create([
             'kod_sobe' => $request->input('kod_sobe'),
             'maksimalan_broj_igraca' => $request->input('maksimalan_broj_igraca'),
             'status' => $request->input('status'),
+            'naziv_sobe' => $request->input('naziv_sobe')
         ]);
-
-        return response()->json(['message' => 'Soba je napravljena uspesno', 'data' => $soba], 201);
+    
+        // Dodavanje pitanja i odgovora za sobu
+        foreach ($request->input('pitanja') as $pitanjeData) {
+            $pitanje = $soba->pitanja()->create([
+                'tekst_pitanja' => $pitanjeData['pitanje'],
+                'kod_sobe' => $soba->kod_sobe // Dodajemo kod sobe pitanju
+            ]);
+    
+            foreach ($pitanjeData['odgovori'] as $index => $odgovorData) {
+                $pitanje->odgovori()->create([
+                    'tekst_odgovora' => $odgovorData,
+                    'tacan_odgovor' => $index == $pitanjeData['tacan_odgovor']
+                ]);
+            }
+        }
+    
+        return response()->json(['message' => 'Soba je napravljena uspešno', 'data' => $soba], 201);
     }
+    
+    
 
     /**
      * Display the specified resource.
@@ -150,4 +172,73 @@ class SobaController extends Controller
             return response()->json(['message' => 'Soba je uspesno obrisana']);
         }
     }
+
+public function vratiRandomSobu(Request $request)
+{
+    // Dohvati slučajnu sobu sa pitanjima i odgovorima
+    $randomSoba = Soba::with('pitanja.odgovori')->inRandomOrder()->first();
+
+    // Pripremi podatke za odgovor
+    $sobaData = [
+        'soba' => $randomSoba,
+        'pitanja' => $randomSoba->pitanja->map(function ($pitanje) {
+            return [
+                'tekst_pitanja' => $pitanje->tekst_pitanja,
+                'odgovori' => $pitanje->odgovori->pluck('tekst_odgovora')->toArray(),
+                'tacan_odgovor' => $pitanje->odgovori->firstWhere('tacan_odgovor', 1)->tekst_odgovora,
+            ];
+        }),
+    ];
+
+    // Vrati podatke kao JSON odgovor
+    return response()->json($sobaData, 200);
+}
+public function getSpecificQuiz($sobaCode)
+{
+    $soba = Soba::where('naziv_sobe', $sobaCode)->first();
+
+
+    
+    if (!$soba) {
+        return response()->json(['error' => 'Soba not found'], 404);
+    }
+
+    // Ako soba postoji, vraćamo pitanja za taj kviz
+    $sobaData = [
+        'soba' => $soba,
+        'pitanja' => $soba->pitanja->map(function ($pitanje) {
+            return [
+                'tekst_pitanja' => $pitanje->tekst_pitanja,
+                'odgovori' => $pitanje->odgovori->pluck('tekst_odgovora')->toArray(),
+                'tacan_odgovor' => $pitanje->odgovori->firstWhere('tacan_odgovor', 1)->tekst_odgovora,
+            ];
+        }),
+    ];
+    return response()->json($sobaData, 200);
+}
+public function getQuizFromCode($kod)
+{
+    $soba = Soba::where('kod_sobe', $kod)->first();
+
+
+    
+    if (!$soba) {
+        return response()->json(['error' => 'Soba not found'], 404);
+    }
+
+    // Ako soba postoji, vraćamo pitanja za taj kviz
+    $sobaData = [
+        'soba' => $soba,
+        'pitanja' => $soba->pitanja->map(function ($pitanje) {
+            return [
+                'tekst_pitanja' => $pitanje->tekst_pitanja,
+                'odgovori' => $pitanje->odgovori->pluck('tekst_odgovora')->toArray(),
+                'tacan_odgovor' => $pitanje->odgovori->firstWhere('tacan_odgovor', 1)->tekst_odgovora,
+            ];
+        }),
+    ];
+    return response()->json($sobaData, 200);
+}
+
+
 }

@@ -9,12 +9,18 @@ class Pitanje extends Model
 {
     use HasFactory;
 
-    protected $fillable = ['tekst_pitanja'];
+    protected $fillable = ['tekst_pitanja', 'kod_sobe'];
 
     public $timestamps = false;
 
     public function odgovori()
     {
         return $this->hasMany(Odgovor::class);
-    }    
+    }
+    public function soba()
+    {
+        return $this->belongsTo(Soba::class, 'kod_sobe', 'kod_sobe');
+    }
+
 }
+

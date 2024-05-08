@@ -18,6 +18,7 @@ class SobaResource extends JsonResource
             'ID' => $this->resource->id,
             'Maksimalan_broj_igraca' => $this->resource->maksimalan_broj_igraca,
             'Status' => $this->resource->status,
+            'naziv_sobe'=> $this->resource->naziv_sobe
         ];
     }
 

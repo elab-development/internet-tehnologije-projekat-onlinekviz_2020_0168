@@ -7,6 +7,10 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Validator;
 use App\Models\User;
+use App\Mail\PasswordResetCodeMail;
+use Illuminate\Support\Facades\Cache;
+use Illuminate\Support\Facades\Mail;
+
 
 class AuthController extends Controller
 {
@@ -49,27 +53,68 @@ class AuthController extends Controller
         return response()->json([
             'access_token' => $token,
             'token_type' => 'Bearer',
+            'user' => [
+                'name' => $user->name,
+                'role' => $user->role, 
+            ],
         ]);
     }
 
     public function forgotPassword(Request $request)
     {   
         $request->validate([
-            'email' => 'required',
-            'new_password' => 'required|string|min:6'
+            'email' => 'required|email',
         ]);
     
         $user = User::where('email', $request->email)->first();
     
         if ($user) {
-            $user->password = Hash::make($request->new_password);
-            $user->save();
+            $code = mt_rand(100000, 999999); 
+            Cache::put('password_reset_code_' . $user->id, $code, now()->addMinutes(10));
+    
             
-            return response()->json(['message' => 'Sifra je uspesno azurirana!']);
+            $this->sendVerificationCode($user->email, $code);
+    
+            return response()->json(['message' => 'Kod je poslat na vašu email adresu.'], 200);
+
         }
     
-        return response()->json(['message' => 'User nije pronadjen'], 404);
+        return response()->json(['message' => 'Korisnik nije pronađen.'], 404);
     }
+
+    private function sendVerificationCode($email, $code)
+    {
+        Mail::to($email)->send(new PasswordResetCodeMail($code));
+    }
+ 
+    public function resetPassword(Request $request)
+    {
+        $request->validate([
+            'email' => 'required|email',
+            'code' => 'required|numeric',
+            'new_password' => 'required|string|min:6',
+        ]);
+    
+        $user = User::where('email', $request->email)->first();
+    
+        if ($user) {
+            $storedCode = Cache::get('password_reset_code_' . $user->id);
+    
+            if ($storedCode && $storedCode == $request->code) {
+                $user->password = Hash::make($request->new_password);
+                $user->save();
+    
+                Cache::forget('password_reset_code_' . $user->id);
+    
+                return response()->json(['message' => 'Šifra je uspešno ažurirana.']);
+            }
+    
+            return response()->json(['message' => 'Pogrešan kod za resetovanje šifre.'], 400);
+        }
+    
+        return response()->json(['message' => 'Korisnik nije pronađen.'], 404);
+    }
+
 
     public function logout(Request $request)
     {

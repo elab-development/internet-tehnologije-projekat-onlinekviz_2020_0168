@@ -8,6 +8,8 @@ use App\Models\Pitanje;
 /**
  * @extends \Illuminate\Database\Eloquent\Factories\Factory<\App\Models\Pitanje>
  */
+
+
 class PitanjeFactory extends Factory
 {
     /**
@@ -18,8 +20,25 @@ class PitanjeFactory extends Factory
     public function definition(): array
     {
         return [
-            'tekst_pitanja' => $this->faker->sentence,   
-            'tezina' => $this->faker->numberBetween(1,3),
+            'tekst_pitanja' => $this->faker->sentence(),
+            'kod_sobe' => '', // Polje kod_sobe će biti popunjeno u SobaSeeder-u
         ];
     }
+
+    /**
+     * Configure the model factory.
+     */
+    public function configure(): self
+    {
+        return $this->afterCreating(function (Pitanje $pitanje) {
+            // Kreiramo 4 odgovora za svako pitanje
+            $pitanje->odgovori()->createMany([
+                ['tekst_odgovora' => $this->faker->sentence(), 'tacan_odgovor' => true],
+                ['tekst_odgovora' => $this->faker->sentence(), 'tacan_odgovor' => false],
+                ['tekst_odgovora' => $this->faker->sentence(), 'tacan_odgovor' => false],
+                ['tekst_odgovora' => $this->faker->sentence(), 'tacan_odgovor' => false],
+            ]);
+        });
+    }
 }
+

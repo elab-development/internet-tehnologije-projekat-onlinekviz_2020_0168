@@ -12,11 +12,13 @@ class Soba extends Model
     protected $fillable = [
         'kod_sobe',
         'maksimalan_broj_igraca',
-        'status'
+        'status',
+        'naziv_sobe'
     ];
 
     public function pitanja()
     {
-        return $this->hasManyThrough(Pitanje::class, Odgovor::class);
-    }    
+        return $this->hasMany(Pitanje::class, 'kod_sobe', 'kod_sobe');
+    }
+    
 }

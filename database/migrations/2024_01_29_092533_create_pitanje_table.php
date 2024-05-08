@@ -14,6 +14,8 @@ return new class extends Migration
         Schema::create('pitanjes', function (Blueprint $table) {
             $table->id();
             $table->string('tekst_pitanja');
+            $table->string('kod_sobe')->nullable(); // Dodajemo kolonu kod_sobe
+            $table->foreign('kod_sobe')->references('kod_sobe')->on('sobas'); // Dodavanje spoljnog ključa
             $table->timestamps();
         });
     }
@@ -23,6 +25,8 @@ return new class extends Migration
      */
     public function down(): void
     {
+        $table->dropForeign(['kod_sobe']);
+        $table->dropColumn('kod_sobe');
         Schema::dropIfExists('pitanjes');
     }
 };

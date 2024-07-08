@@ -22,7 +22,7 @@ class AuthController extends Controller
             'password'=>'required|string|min:8'
         ]);
         if($validator->fails()){
-            return response()->json($validator->errors());
+            return response()->json($validator->errors(),400);
         }
         $user=User::create([
             'name'=>$request->name,
@@ -92,7 +92,7 @@ class AuthController extends Controller
         $request->validate([
             'email' => 'required|email',
             'code' => 'required|numeric',
-            'new_password' => 'required|string|min:6',
+            'new_password' => 'required|string|min:8',
         ]);
     
         $user = User::where('email', $request->email)->first();

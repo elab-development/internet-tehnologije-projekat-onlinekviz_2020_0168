@@ -108,6 +108,11 @@ Route::post('/forgotpassword',[AuthController::class,'forgotPassword']);
 Route::post('/resetpassword',[AuthController::class,'resetPassword']);
 Route::post('/rezultati',[RezultatController::class,'store']);
 
+Route::post('/removeUserProgress', [SobaController::class, 'removeUserProgress']);
+Route::post('/updateUserStatus', [SobaController::class, 'updateUserStatus']);
+
+
+
 Route::group(['middleware' => ['auth:sanctum']], function () {
     Route::post('/logout', [AuthController::class, 'logout']);  
 

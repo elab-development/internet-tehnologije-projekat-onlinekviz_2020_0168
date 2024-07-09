@@ -16,7 +16,7 @@ class PitanjeSeeder extends Seeder
     public function run(): void
     {
         // Dobijanje koda sobe
-        $kod_sobe = Soba::first()->kod_sobe; // Pretpostavka je da imate bar jednu sobu u bazi
+        $kod_sobe = Soba::first()->kod_sobe; 
 
         // Kreiranje 10 pitanja sa istim kodom sobe
         for ($i = 0; $i < 10; $i++) {

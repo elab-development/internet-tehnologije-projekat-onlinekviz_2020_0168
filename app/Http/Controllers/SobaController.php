@@ -14,33 +14,58 @@ class SobaController extends Controller
     /**
      * Display a listing of the resource.
      */
-    
-    public function getUsersProgress($roomName)
+    public function updateInRoomStatus(Request $request)
     {
         try {
-            $progress = UserProgress::where('room_name', $roomName)
-                ->select('username', 'question_number')
-                ->get();
-     
-            return response()->json($progress, 200);
+            $roomName = $request->input('room');
+            $username = $request->input('username');
+            $inRoom = $request->input('inRoom');
+    
+            \Log::info("Updating in-room status", compact('roomName', 'username', 'inRoom'));
+    
+            if (is_null($roomName) || is_null($username) || is_null($inRoom)) {
+                \Log::error('Missing required parameters', compact('roomName', 'username', 'inRoom'));
+                return response()->json(['message' => 'Bad Request'], 400);
+            }
+    
+            $userProgress = UserProgress::updateOrCreate(
+                ['username' => $username, 'room_name' => $roomName],
+                ['in_room' => $inRoom]
+            );
+    
+            \Log::info("User progress updated", ['userProgress' => $userProgress]);
+    
+            return response()->json(['message' => 'User in-room status updated'], 200);
         } catch (\Exception $e) {
-            return response()->json(['message' => 'Error fetching users progress', 'error' => $e->getMessage()], 500);
+            \Log::error("Error updating in-room status: " . $e->getMessage());
+            return response()->json(['message' => 'Internal Server Error', 'error' => $e->getMessage()], 500);
         }
     }
+    
      
-
-    public function updateQuestionProgress(Request $request)
-    {
-        $roomName = $request->input('room');
-        $username = $request->input('username');
-        $questionNumber = $request->input('questionNumber');
-
-        // Emituj događaj
-        event(new QuestionProgressUpdated($roomName, $username, $questionNumber));
-
-        return response()->json(['message' => 'Event emitted'], 200);
-    }
-
+ 
+     public function getUsersProgress($roomName)
+     {
+         try {
+             $progress = UserProgress::where('room_name', $roomName)
+                 ->select('username', 'question_number', 'in_room')
+                 ->get();
+             return response()->json($progress, 200);
+         } catch (\Exception $e) {
+             return response()->json(['message' => 'Error fetching users progress', 'error' => $e->getMessage()], 500);
+         }
+     }
+ 
+     public function updateQuestionProgress(Request $request)
+     {
+         $roomName = $request->input('room');
+         $username = $request->input('username');
+         $questionNumber = $request->input('questionNumber');
+ 
+         event(new QuestionProgressUpdated($roomName, $username, $questionNumber));
+ 
+         return response()->json(['message' => 'Event emitted'], 200);
+     }
 
     public function index()
     {
@@ -204,7 +229,7 @@ class SobaController extends Controller
 
 public function vratiRandomSobu(Request $request)
 {
-    // Dohvati slučajnu sobu sa pitanjima i odgovorima
+
     $randomSoba = Soba::with('pitanja.odgovori')->inRandomOrder()->first();
 
     // Pripremi podatke za odgovor
@@ -232,7 +257,7 @@ public function getSpecificQuiz($sobaCode)
         return response()->json(['error' => 'Soba not found'], 404);
     }
 
-    // Ako soba postoji, vraćamo pitanja za taj kviz
+    // Ako soba postoji, vracamo pitanja za taj kviz
     $sobaData = [
         'soba' => $soba,
         'pitanja' => $soba->pitanja->map(function ($pitanje) {
@@ -255,7 +280,7 @@ public function getQuizFromCode($kod)
         return response()->json(['error' => 'Soba not found'], 404);
     }
 
-    // Ako soba postoji, vraćamo pitanja za taj kviz
+    // Ako soba postoji, vracamo pitanja za taj kviz
     $sobaData = [
         'soba' => $soba,
         'pitanja' => $soba->pitanja->map(function ($pitanje) {

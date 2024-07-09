@@ -7,6 +7,7 @@ use App\Http\Controllers\OdgovorController;
 use App\Http\Controllers\SobaController;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\UserController;
+use App\Http\Controllers\RezultatController;
 use App\Events\QuestionProgressUpdated;
 use Illuminate\Support\Facades\Log;
 use App\Models\UserProgress;
@@ -62,7 +63,7 @@ Route::post('/emitQuestionProgress', function (Request $request) {
             return response()->json(['message' => 'Bad Request'], 400);
         }
 
-        // Ažuriraj napredak korisnika
+        // Azuriranje napretka korisnika
         UserProgress::updateOrCreate(
             ['username' => $username, 'room_name' => $roomName],
             ['question_number' => $questionNumber]
@@ -78,7 +79,7 @@ Route::post('/emitQuestionProgress', function (Request $request) {
 
         event(new QuestionProgressUpdated($roomName, $username, $questionNumber));
 
-        // Log posle uspešnog emitovanja event-a
+        // Log posle uspesnog emitovanja event-a
         Log::info('Event emitted successfully', [
             'event' => 'QuestionProgressUpdated',
             'roomName' => $roomName,
@@ -100,6 +101,7 @@ Route::post('/emitQuestionProgress', function (Request $request) {
 
 
 Route::get('/room/{roomName}/progress', [SobaController::class, 'getUsersProgress']);
+Route::get('/rezultati/{roomName}', [RezultatController::class, 'getLastResults']);
 
 
 Route::post('/register',[AuthController::class,'register']);
@@ -110,7 +112,7 @@ Route::post('/rezultati',[RezultatController::class,'store']);
 
 Route::post('/removeUserProgress', [SobaController::class, 'removeUserProgress']);
 Route::post('/updateUserStatus', [SobaController::class, 'updateUserStatus']);
-
+Route::post('/updateInRoomStatus', [SobaController::class, 'updateInRoomStatus']);
 
 
 Route::group(['middleware' => ['auth:sanctum']], function () {

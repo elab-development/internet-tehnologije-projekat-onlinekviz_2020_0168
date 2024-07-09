@@ -13,8 +13,9 @@ class UserProgress extends Model
 
     protected $fillable = [
         'username',
-        'room_name',
+        'room_name',     
         'question_number',
+        'in_room'
     ];
 }
 

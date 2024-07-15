@@ -1,13 +1,11 @@
-import React from 'react';
-
-function Button({ title, onClick, difficulty }) {
+function Button({ title, onClick, difficulty, className, disabled }) {
   const handleClick = () => {
     onClick(difficulty);
   };
 
   return (
     <>
-      <button className='buttonNext' onClick={handleClick}>
+      <button className={`buttonNext ${className}`} onClick={handleClick} disabled={disabled}>
         {title}
       </button>
     </>

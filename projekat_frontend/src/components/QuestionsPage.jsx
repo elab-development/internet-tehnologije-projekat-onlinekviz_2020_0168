@@ -207,7 +207,6 @@ const QuestionsPage2 = ({ handleResult, timeLeftMultiplier, difficulty, roomName
   useEffect(() => {
     console.log('Room name:', roomName);
     fetchQuizData();
-    resetCountdown();
     updateInRoomStatus(true); 
 
     const pusher = new Pusher('0bf8e5e615e9d75a485f', {

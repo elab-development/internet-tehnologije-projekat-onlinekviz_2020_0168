@@ -10,8 +10,6 @@ import { MdArrowBack } from "react-icons/md";
 import Pusher from 'pusher-js';
 
 const QuestionsPage2 = ({ handleResult, timeLeftMultiplier, difficulty, roomName, roomCode, username }) => {
-  console.log('QuestionsPage2 component rendered'); 
-
   const [quizData, setQuizData] = useState([]); 
   const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0); 
   const [otherUsersQuestion, setOtherUsersQuestion] = useState({});
@@ -53,7 +51,7 @@ const QuestionsPage2 = ({ handleResult, timeLeftMultiplier, difficulty, roomName
         room: roomName,
         username: username,
         inRoom: inRoom,
-        questionNumber: brojac, // Dodavanje broja pitanja
+        questionNumber: brojac,
     });
 
     fetch('http://127.0.0.1:8000/api/updateInRoomStatus', {
@@ -65,7 +63,7 @@ const QuestionsPage2 = ({ handleResult, timeLeftMultiplier, difficulty, roomName
             room: roomName,
             username: username,
             inRoom: inRoom,
-            questionNumber: brojac, // Dodavanje broja pitanja
+            questionNumber: brojac,
         }),
     })
     .then(response => {

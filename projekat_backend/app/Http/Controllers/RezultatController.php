@@ -74,17 +74,16 @@ class RezultatController extends Controller
     {
         try {
             Log::info('Fetching last results for room', ['roomName' => $roomName]);
-
+    
             $results = Rezultat::where('naziv_sobe', $roomName)
-                ->orderBy('created_at', 'desc')
-                ->take(5)
+                ->orderBy('ime_igraca')
+                ->orderBy('trenutni_rezultat', 'desc')
                 ->get(['ime_igraca', 'trenutni_rezultat']);
-
+    
             return response()->json($results, 200);
         } catch (\Exception $e) {
             Log::error('Error fetching results: ' . $e->getMessage());
             return response()->json(['message' => 'Error fetching results', 'error' => $e->getMessage()], 500);
         }
-    }
-    
+    }    
 }

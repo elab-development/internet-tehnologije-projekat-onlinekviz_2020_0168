@@ -50,6 +50,7 @@ function ResultsPage({ username, result, resetResult }) {
       console.log('Fetching previous results for room:', roomname);
       const response = await fetch(`http://127.0.0.1:8000/api/rezultati/${roomname}`);
       const data = await response.json();
+      console.log('Fetched previous results:', data);
       setPreviousResults(data);
     } catch (error) {
       console.error('Greska u dohvatanju prethodnih rezultata:', error);
@@ -108,6 +109,17 @@ function ResultsPage({ username, result, resetResult }) {
     };
   }, [result]);
 
+  const filterUniqueResults = (results) => {
+    const uniqueResults = {};
+    results.forEach(res => {
+      const key = res.ime_igraca;
+      if (!uniqueResults[key] || uniqueResults[key].trenutni_rezultat < res.trenutni_rezultat) {
+        uniqueResults[key] = res;
+      }
+    });
+    return Object.values(uniqueResults);
+  };
+
   return (
     <>
       <div className="resultsContainer">
@@ -124,10 +136,7 @@ function ResultsPage({ username, result, resetResult }) {
               </tr>
             </thead>
             <tbody>
-              {Object.values(previousResults.reduce((acc, res) => {
-                acc[res.ime_igraca] = res;
-                return acc;
-              }, {})).map((res, index) => (
+              {filterUniqueResults(previousResults).map((res, index) => (
                 <tr key={index}>
                   <td>{res.ime_igraca}</td>
                   <td>{res.trenutni_rezultat}</td>

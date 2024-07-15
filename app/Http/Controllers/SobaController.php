@@ -20,7 +20,7 @@ class SobaController extends Controller
              $roomName = $request->input('room');
              $username = $request->input('username');
              $inRoom = $request->input('inRoom');
-             $questionNumber = $request->input('questionNumber', 0); // Podrazumevana vrednost 0
+             $questionNumber = $request->input('questionNumber', 0); 
      
              Log::info("Received request to update in-room status", [
                  'roomName' => $roomName,
@@ -116,15 +116,7 @@ class SobaController extends Controller
     $sobe = $query->paginate(2, ['*'], 'page', $page);
 
     return response()->json(['sobe' => $sobe], 200);
-        /*
-         $status = $request->input('status');
-         $validneStatusVrednosti = ['aktivna', 'neaktivna', 'zavrsena'];
-         if (!in_array($status, $validneStatusVrednosti)) {
-             return response()->json(['error' => 'Nije vazeca vrednost za status.'], 400);
-         }
-         $sobe = Soba::where('status', $status)->get();    
-         return response()->json(['sobe' => $sobe], 200);
-         */
+
         }
 
     public function prikaziSobePoMaksimalnomBrojuUcesnika($maksimalanBrojUcesnika)
@@ -171,11 +163,10 @@ class SobaController extends Controller
             'naziv_sobe' => $request->input('naziv_sobe')
         ]);
     
-        // Dodavanje pitanja i odgovora za sobu
         foreach ($request->input('pitanja') as $pitanjeData) {
             $pitanje = $soba->pitanja()->create([
                 'tekst_pitanja' => $pitanjeData['pitanje'],
-                'kod_sobe' => $soba->kod_sobe // Dodajemo kod sobe pitanju
+                'kod_sobe' => $soba->kod_sobe 
             ]);
     
             foreach ($pitanjeData['odgovori'] as $index => $odgovorData) {
@@ -237,7 +228,6 @@ public function vratiRandomSobu(Request $request)
 
     $randomSoba = Soba::with('pitanja.odgovori')->inRandomOrder()->first();
 
-    // Pripremi podatke za odgovor
     $sobaData = [
         'soba' => $randomSoba,
         'pitanja' => $randomSoba->pitanja->map(function ($pitanje) {
@@ -249,7 +239,6 @@ public function vratiRandomSobu(Request $request)
         }),
     ];
 
-    // Vrati podatke kao JSON odgovor
     return response()->json($sobaData, 200);
 }
 public function getSpecificQuiz($sobaCode)
@@ -262,7 +251,6 @@ public function getSpecificQuiz($sobaCode)
         return response()->json(['error' => 'Soba not found'], 404);
     }
 
-    // Ako soba postoji, vracamo pitanja za taj kviz
     $sobaData = [
         'soba' => $soba,
         'pitanja' => $soba->pitanja->map(function ($pitanje) {
@@ -285,7 +273,6 @@ public function getQuizFromCode($kod)
         return response()->json(['error' => 'Soba not found'], 404);
     }
 
-    // Ako soba postoji, vracamo pitanja za taj kviz
     $sobaData = [
         'soba' => $soba,
         'pitanja' => $soba->pitanja->map(function ($pitanje) {

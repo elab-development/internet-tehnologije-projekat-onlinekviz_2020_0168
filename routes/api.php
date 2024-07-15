@@ -69,7 +69,6 @@ Route::post('/emitQuestionProgress', function (Request $request) {
             ['question_number' => $questionNumber]
         );
 
-        // Log pre emitovanja event-a
         Log::info('Emitting event', [
             'event' => 'QuestionProgressUpdated',
             'roomName' => $roomName,
@@ -79,7 +78,6 @@ Route::post('/emitQuestionProgress', function (Request $request) {
 
         event(new QuestionProgressUpdated($roomName, $username, $questionNumber));
 
-        // Log posle uspesnog emitovanja event-a
         Log::info('Event emitted successfully', [
             'event' => 'QuestionProgressUpdated',
             'roomName' => $roomName,
@@ -126,8 +124,6 @@ Route::group(['middleware' => ['auth:sanctum']], function () {
 
     Route::delete('/sobe/{id}', [SobaController::class, 'destroy']);
 
-    //Route::get('/pitanja', [PitanjeController::class, 'index']);
-    //Route::put('/pitanja/{id}', [PitanjeController::class, 'update']);
     Route::resource('pitanja', PitanjeController::class);
     
     Route::put('/odgovori/{id}', [OdgovorController::class, 'update']);

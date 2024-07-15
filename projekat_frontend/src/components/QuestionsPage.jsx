@@ -1,5 +1,3 @@
-
-
 import React, { useEffect, useState, useRef, useCallback, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Button from './Button';
@@ -130,6 +128,7 @@ const QuestionsPage2 = ({ handleResult, timeLeftMultiplier, difficulty, roomName
             localStorage.setItem('result', result);
             localStorage.setItem('naziv_sobe', roomName);
             navigate('/results', { state: { timeLeft } });
+            setResult(0);
           }
 
           return nextBrojac;
@@ -146,7 +145,7 @@ const QuestionsPage2 = ({ handleResult, timeLeftMultiplier, difficulty, roomName
       setSelected(true);
   
       console.log('Time left: ' + time);
-      let scoreMultiplier = answer === quizData[currentQuestionIndex].correctAnswer ? 10 : 0;
+      let scoreMultiplier = answer.toLowerCase() === quizData[currentQuestionIndex].correctAnswer.toLowerCase() ? 10 : 0;
       console.log('Score multiplier: ' + scoreMultiplier);
       pauseCountdown();
   
@@ -154,6 +153,8 @@ const QuestionsPage2 = ({ handleResult, timeLeftMultiplier, difficulty, roomName
       console.log('Broj poena za ovaj odgovor: ' + roundResult);
       setResult(prevResult => {
         const newResult = prevResult + roundResult;
+        console.log('Previous result: ' + prevResult);
+        console.log('New result: ' + newResult);
         handleResult(newResult); 
         return newResult;
       });
@@ -207,7 +208,6 @@ const QuestionsPage2 = ({ handleResult, timeLeftMultiplier, difficulty, roomName
     console.log('Room name:', roomName);
     fetchQuizData();
     resetCountdown();
-    setResult(0); 
     updateInRoomStatus(true); 
 
     const pusher = new Pusher('0bf8e5e615e9d75a485f', {
@@ -302,7 +302,6 @@ const QuestionsPage2 = ({ handleResult, timeLeftMultiplier, difficulty, roomName
           <h3>Other Users' Progress:</h3>
           <p>Online users answering this question: {usersAnswering}</p>
           <p>Online users who answered this question: {usersAnswered}</p>
-          {console.log('Rendering otherUsersQuestion:', otherUsersQuestion)}
         </div>
       </div>
     </>

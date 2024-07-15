@@ -63,7 +63,7 @@ Route::post('/emitQuestionProgress', function (Request $request) {
             return response()->json(['message' => 'Bad Request'], 400);
         }
 
-        // Azuriranje napretka korisnika
+        
         UserProgress::updateOrCreate(
             ['username' => $username, 'room_name' => $roomName],
             ['question_number' => $questionNumber]

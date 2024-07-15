@@ -5,14 +5,73 @@ namespace App\Http\Controllers;
 use App\Models\Soba;
 use Illuminate\Http\Request;
 use App\Http\Resources\SobaResource;
-use Illuminate\Pagination\Paginator;
 use Illuminate\Support\Facades\Validator; 
+use App\Models\UserProgress;
+use Illuminate\Support\Facades\Log;
 
 class SobaController extends Controller
 {
     /**
      * Display a listing of the resource.
      */
+     
+     public function updateInRoomStatus(Request $request) {
+         try {
+             $roomName = $request->input('room');
+             $username = $request->input('username');
+             $inRoom = $request->input('inRoom');
+             $questionNumber = $request->input('questionNumber', 0); 
+     
+             Log::info("Received request to update in-room status", [
+                 'roomName' => $roomName,
+                 'username' => $username,
+                 'inRoom' => $inRoom,
+                 'questionNumber' => $questionNumber,
+                 'request' => $request->all()
+             ]);
+     
+             if (is_null($roomName) || is_null($username) || is_null($inRoom)) {
+                 Log::error('Missing required parameters', compact('roomName', 'username', 'inRoom'));
+                 return response()->json(['message' => 'Bad Request'], 400);
+             }
+     
+             $userProgress = UserProgress::updateOrCreate(
+                 ['username' => $username, 'room_name' => $roomName],
+                 ['in_room' => $inRoom, 'question_number' => $questionNumber]
+             );
+     
+             Log::info("User progress updated successfully", ['userProgress' => $userProgress]);
+     
+             return response()->json(['message' => 'User in-room status updated'], 200);
+         } catch (\Exception $e) {
+             Log::error("Error updating in-room status: " . $e->getMessage(), ['trace' => $e->getTraceAsString()]);
+             return response()->json(['message' => 'Internal Server Error', 'error' => $e->getMessage()], 500);
+         }
+     }
+          
+     public function getUsersProgress($roomName)
+     {
+         try {
+             $progress = UserProgress::where('room_name', $roomName)
+                 ->select('username', 'question_number', 'in_room')
+                 ->get();
+             return response()->json($progress, 200);
+         } catch (\Exception $e) {
+             return response()->json(['message' => 'Error fetching users progress', 'error' => $e->getMessage()], 500);
+         }
+     }
+ 
+     public function updateQuestionProgress(Request $request)
+     {
+         $roomName = $request->input('room');
+         $username = $request->input('username');
+         $questionNumber = $request->input('questionNumber');
+ 
+         event(new QuestionProgressUpdated($roomName, $username, $questionNumber));
+ 
+         return response()->json(['message' => 'Event emitted'], 200);
+     }
+
     public function index()
     {
         $sobas = Soba::all();
@@ -57,15 +116,6 @@ class SobaController extends Controller
     $sobe = $query->paginate(2, ['*'], 'page', $page);
 
     return response()->json(['sobe' => $sobe], 200);
-        /*
-         $status = $request->input('status');
-         $validneStatusVrednosti = ['aktivna', 'neaktivna', 'zavrsena'];
-         if (!in_array($status, $validneStatusVrednosti)) {
-             return response()->json(['error' => 'Nije vazeca vrednost za status.'], 400);
-         }
-         $sobe = Soba::where('status', $status)->get();    
-         return response()->json(['sobe' => $sobe], 200);
-         */
         }
 
     public function prikaziSobePoMaksimalnomBrojuUcesnika($maksimalanBrojUcesnika)
@@ -112,11 +162,10 @@ class SobaController extends Controller
             'naziv_sobe' => $request->input('naziv_sobe')
         ]);
     
-        // Dodavanje pitanja i odgovora za sobu
         foreach ($request->input('pitanja') as $pitanjeData) {
             $pitanje = $soba->pitanja()->create([
                 'tekst_pitanja' => $pitanjeData['pitanje'],
-                'kod_sobe' => $soba->kod_sobe // Dodajemo kod sobe pitanju
+                'kod_sobe' => $soba->kod_sobe 
             ]);
     
             foreach ($pitanjeData['odgovori'] as $index => $odgovorData) {
@@ -175,10 +224,9 @@ class SobaController extends Controller
 
 public function vratiRandomSobu(Request $request)
 {
-    // Dohvati slučajnu sobu sa pitanjima i odgovorima
+
     $randomSoba = Soba::with('pitanja.odgovori')->inRandomOrder()->first();
 
-    // Pripremi podatke za odgovor
     $sobaData = [
         'soba' => $randomSoba,
         'pitanja' => $randomSoba->pitanja->map(function ($pitanje) {
@@ -190,7 +238,6 @@ public function vratiRandomSobu(Request $request)
         }),
     ];
 
-    // Vrati podatke kao JSON odgovor
     return response()->json($sobaData, 200);
 }
 public function getSpecificQuiz($sobaCode)
@@ -203,7 +250,6 @@ public function getSpecificQuiz($sobaCode)
         return response()->json(['error' => 'Soba not found'], 404);
     }
 
-    // Ako soba postoji, vraćamo pitanja za taj kviz
     $sobaData = [
         'soba' => $soba,
         'pitanja' => $soba->pitanja->map(function ($pitanje) {
@@ -226,7 +272,6 @@ public function getQuizFromCode($kod)
         return response()->json(['error' => 'Soba not found'], 404);
     }
 
-    // Ako soba postoji, vraćamo pitanja za taj kviz
     $sobaData = [
         'soba' => $soba,
         'pitanja' => $soba->pitanja->map(function ($pitanje) {

@@ -7,6 +7,7 @@ use Illuminate\Http\Request;
 use App\Http\Resources\SobaResource;
 use Illuminate\Support\Facades\Validator; 
 use App\Models\UserProgress;
+use App\Events\QuestionProgressUpdated;
 use Illuminate\Support\Facades\Log;
 
 class SobaController extends Controller
@@ -14,6 +15,58 @@ class SobaController extends Controller
     /**
      * Display a listing of the resource.
      */
+
+    public function emitQuestionProgress(Request $request) {
+        try {
+            $roomName = $request->input('room');
+            $username = $request->input('username');
+            $questionNumber = $request->input('questionNumber');
+    
+            Log::info('Received input data', [
+                'roomName' => $roomName,
+                'username' => $username,
+                'questionNumber' => $questionNumber
+            ]);
+    
+            if (is_null($roomName) || is_null($username) || is_null($questionNumber)) {
+                Log::error('Missing input data', [
+                    'roomName' => $roomName,
+                    'username' => $username,
+                    'questionNumber' => $questionNumber
+                ]);
+                return response()->json(['message' => 'Bad Request'], 400);
+            }
+    
+            
+            UserProgress::updateOrCreate(
+                ['username' => $username, 'room_name' => $roomName],
+                ['question_number' => $questionNumber]
+            );
+    
+            Log::info('Emitting event', [
+                'event' => 'QuestionProgressUpdated',
+                'roomName' => $roomName,
+                'username' => $username,
+                'questionNumber' => $questionNumber
+            ]);
+    
+            event(new QuestionProgressUpdated($roomName, $username, $questionNumber));
+    
+            Log::info('Event emitted successfully', [
+                'event' => 'QuestionProgressUpdated',
+                'roomName' => $roomName,
+                'username' => $username,
+                'questionNumber' => $questionNumber
+            ]);
+    
+            return response()->json(['message' => 'Event emitted'], 200);
+        } catch (\Exception $e) {
+            Log::error('Error emitting QuestionProgressUpdated event: ' . $e->getMessage(), [
+                'trace' => $e->getTraceAsString()
+            ]);
+            return response()->json(['message' => 'Internal Server Error', 'error' => $e->getMessage()], 500);
+        }
+    }
      
      public function updateInRoomStatus(Request $request) {
          try {

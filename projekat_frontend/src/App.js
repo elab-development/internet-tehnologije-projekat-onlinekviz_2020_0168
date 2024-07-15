@@ -18,10 +18,13 @@ import EnterCode from './components/EnterCode';
 function App() {
   const [username, setUsername] = useState('');
   const [result, setResult] = useState(0);
-  const [timeLeftMultiplier, setTimeLeftMultiplier] = useState(10); // Dodajte timeLeftMultiplier
+  const [timeLeftMultiplier, setTimeLeftMultiplier] = useState(10); 
   const [difficultyVariable, setDifficultyVariable] = useState('');
+  const [roomName, setRoomName] = useState('');
+  const [roomCode, setRoomCode] = useState('');
   const handleResult = (newResult) => {
     setResult(newResult);
+    console.log('Novi rez je: ',newResult)
   };
 
   const resetResult = () => {

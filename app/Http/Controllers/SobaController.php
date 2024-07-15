@@ -5,45 +5,50 @@ namespace App\Http\Controllers;
 use App\Models\Soba;
 use Illuminate\Http\Request;
 use App\Http\Resources\SobaResource;
-use Illuminate\Pagination\Paginator;
 use Illuminate\Support\Facades\Validator; 
 use App\Models\UserProgress;
+use Illuminate\Support\Facades\Log;
 
 class SobaController extends Controller
 {
     /**
      * Display a listing of the resource.
      */
-    public function updateInRoomStatus(Request $request)
-    {
-        try {
-            $roomName = $request->input('room');
-            $username = $request->input('username');
-            $inRoom = $request->input('inRoom');
-    
-            \Log::info("Updating in-room status", compact('roomName', 'username', 'inRoom'));
-    
-            if (is_null($roomName) || is_null($username) || is_null($inRoom)) {
-                \Log::error('Missing required parameters', compact('roomName', 'username', 'inRoom'));
-                return response()->json(['message' => 'Bad Request'], 400);
-            }
-    
-            $userProgress = UserProgress::updateOrCreate(
-                ['username' => $username, 'room_name' => $roomName],
-                ['in_room' => $inRoom]
-            );
-    
-            \Log::info("User progress updated", ['userProgress' => $userProgress]);
-    
-            return response()->json(['message' => 'User in-room status updated'], 200);
-        } catch (\Exception $e) {
-            \Log::error("Error updating in-room status: " . $e->getMessage());
-            return response()->json(['message' => 'Internal Server Error', 'error' => $e->getMessage()], 500);
-        }
-    }
-    
      
- 
+     public function updateInRoomStatus(Request $request) {
+         try {
+             $roomName = $request->input('room');
+             $username = $request->input('username');
+             $inRoom = $request->input('inRoom');
+             $questionNumber = $request->input('questionNumber', 0); // Podrazumevana vrednost 0
+     
+             Log::info("Received request to update in-room status", [
+                 'roomName' => $roomName,
+                 'username' => $username,
+                 'inRoom' => $inRoom,
+                 'questionNumber' => $questionNumber,
+                 'request' => $request->all()
+             ]);
+     
+             if (is_null($roomName) || is_null($username) || is_null($inRoom)) {
+                 Log::error('Missing required parameters', compact('roomName', 'username', 'inRoom'));
+                 return response()->json(['message' => 'Bad Request'], 400);
+             }
+     
+             $userProgress = UserProgress::updateOrCreate(
+                 ['username' => $username, 'room_name' => $roomName],
+                 ['in_room' => $inRoom, 'question_number' => $questionNumber]
+             );
+     
+             Log::info("User progress updated successfully", ['userProgress' => $userProgress]);
+     
+             return response()->json(['message' => 'User in-room status updated'], 200);
+         } catch (\Exception $e) {
+             Log::error("Error updating in-room status: " . $e->getMessage(), ['trace' => $e->getTraceAsString()]);
+             return response()->json(['message' => 'Internal Server Error', 'error' => $e->getMessage()], 500);
+         }
+     }
+          
      public function getUsersProgress($roomName)
      {
          try {
